@@ -1,0 +1,6 @@
+numSlices = 1
+scanZoomFactor = 3
+SacqState = 'loop'
+trigAcqEdge = 'rising'
+SframesPerSlice = 1stackZStepSize = 50
+S
