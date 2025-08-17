@@ -24,7 +24,7 @@ def pSHGArrows(I2, Phi2, allSum, mask, data_path, arrowColourMax):
     ax.imshow(allSum*mask, cmap = 'gray', vmin = 0, vmax =np.max(allSum))
     
     Phi2 = np.where(mask == 0 , np.inf, Phi2)
-    n = 6 # Add every nth arrow to SHG intensity image
+    n = 10 # Add every nth arrow to SHG intensity image
     arrowLength = 2
     angularOffset = 0
             
