@@ -43,7 +43,7 @@ def pSHGmultiPanel(allSum, phi2, I2, I4, I4a, I4s, threshLow, threshHigh, data_p
     mycm = plt.cm.get_cmap("hot").copy()
     mycm.set_bad(color='black') 
     
-    p4 = ax4.imshow(im, cmap = mycm, vmin = 0, vmax = 0.4)
+    p4 = ax4.imshow(im, cmap = mycm, vmin = 0, vmax = 0.5)
     divider = make_axes_locatable(ax4)
     cax = divider.append_axes("right", size="5%", pad=0.1)
     ax4. axis('off')
