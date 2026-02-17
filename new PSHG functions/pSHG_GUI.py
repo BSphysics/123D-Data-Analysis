@@ -5,11 +5,16 @@ Created on Wed May 25 15:42:25 2022
 @author: Ben
 """
 
-from tkinter import *
+#from tkinter import *
 import PySimpleGUI as sg
 
-def pSHGGUI(initialDir, defaultDir, defaultThreshold):
-    sg.theme("DarkBlue15")
+def pSHGGUI(initialDir, defaultDir, defaultThreshold, mode):
+    
+    if mode.lower() == 'transmission':
+        sg.theme("DarkGreen5")
+    
+    else:
+        sg.theme("DarkBlue15")
     
     
     file_list_column = [

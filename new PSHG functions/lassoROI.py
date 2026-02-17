@@ -11,6 +11,8 @@ from matplotlib.widgets import LassoSelector
 from pathlib import Path as Path1
 from matplotlib.path import Path as Path2
 import os
+import matplotlib
+matplotlib.use('Qt5Agg') 
 
 def lassoROI(im, phi2, I2, mask, time2wait, data_path):
     
@@ -45,9 +47,11 @@ def lassoROI(im, phi2, I2, mask, time2wait, data_path):
     fig.canvas.mpl_connect('button_press_event' , onPress)
     fig.canvas.mpl_connect('button_release_event' , onRelease)
 
-    plt.show()
     plt.title(str(time2wait) + ' seconds to draw an ROI')
+    plt.show(block=False)
     plt.pause(time2wait)
+    plt.close()
+
 
     width, height = len(im), len(im)
     x, y = np.mgrid[:height, :width]
