@@ -170,18 +170,16 @@ if plotPolarHistogram == True:
 
 #%%
 plt.close('all')
-if uselassoROI == True:
+from pSHG_histograms_NEW import pSHGhistogramsNEW
+if usepolygonalROI == True:
    
-    from lassoROI import lassoROI  
-    
-    time2wait = 10
-    [ROI , lassoSavePath] = lassoROI(allSum, Phi2, I2, mask, time2wait, folderName) #ROI is a mask than is 0 outside, and 1 inside the hand draw region
-                          # lassoROI(im, phi2, I2, mask, time2wait, data_path)
-    ROI[ROI==0] = np.inf
-    [bins , binCounts] = pSHGhistogramsNEW(Phi2*ROI, mask, 'Phi2', lassoSavePath)
-    [bins , binCounts] = pSHGhistogramsNEW(I2*ROI, mask, 'I2', lassoSavePath)
-    [bins , binCounts] = pSHGhistogramsNEW(I4a*ROI, mask, 'I4a', lassoSavePath)
-    [bins , binCounts] = pSHGhistogramsNEW(I4s*ROI, mask, 'I4s', lassoSavePath)
+    from polygonal_roi import polygonalROI
+        
+    [ROI , polygonalSavePath] = polygonalROI(allSum, Phi2, I2, mask, folderName) #ROI is a mask than is 0 outside, and 1 inside the hand draw region
+    [bins , binCounts , roi_data] = pSHGhistogramsNEW(Phi2*ROI, mask, 'Phi2', polygonalSavePath)
+    [bins , binCounts , roi_data] = pSHGhistogramsNEW(I2*ROI, mask, 'I2', polygonalSavePath)
+    [bins , binCounts , roi_data] = pSHGhistogramsNEW(I4a*ROI, mask, 'I4a', polygonalSavePath)
+    [bins , binCounts , roi_data] = pSHGhistogramsNEW(I4s*ROI, mask, 'I4s', polygonalSavePath)
    
 plt.close('all')
 path = os.path.realpath(folderName)
