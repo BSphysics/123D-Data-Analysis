@@ -39,7 +39,7 @@ def pSHGGUI(initialDir, defaultDir, defaultThreshold, mode):
         [sg.T("         ")],
         [sg.T("         "), sg.Checkbox('Show Arrow plot?',  default=True, key="input4")],
         [sg.T("         ")],
-        [sg.T("         "), sg.Checkbox('Use lasso ROI?',  default=False, key="input5")],
+        [sg.T("         "), sg.Checkbox('Use polygonal ROI?',  default=False, key="input5")],
         [sg.T("         ")],
         [sg.T("         "), sg.Checkbox('Use slider intensity threshold?',  default=True, key="input6")],
         [sg.T("         ")],
