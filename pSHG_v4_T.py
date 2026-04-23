@@ -57,7 +57,7 @@ for idx in range(len(imgs)-2): #MAIN LOOP
        im = np.transpose(im, axes=(2,0,1)) 
        
     if im.ndim>2:
-        shg = im[0,:,:]
+        shg = im[2,:,:]
         tpf = im[1,:,:]
         shg[shg<0] = 0
         tpf[tpf<0] = 0   
