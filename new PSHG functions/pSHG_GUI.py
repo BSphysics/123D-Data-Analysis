@@ -40,6 +40,9 @@ def pSHGGUI(initialDir, defaultDir, defaultThreshold, mode):
         [sg.T("         "), sg.Checkbox('Show Arrow plot?',  default=True, key="input4")],
         [sg.T("         ")],
         [sg.T("         "), sg.Checkbox('Use polygonal ROI?',  default=False, key="input5")],
+        [sg.T("         "), sg.Radio('Phi 2', "roi_mode", default=True, key="roi_A"),
+                             sg.Radio('I2', "roi_mode", key="roi_B"),
+                             sg.Radio('Total SHG', "roi_mode", key="roi_C")],
         [sg.T("         ")],
         [sg.T("         "), sg.Checkbox('Use slider intensity threshold?',  default=True, key="input6")],
         [sg.T("         ")],
@@ -104,6 +107,15 @@ def pSHGGUI(initialDir, defaultDir, defaultThreshold, mode):
     if values["input3"] == True:
         print('\n Plotting the polar histogram')
     else:
-        print(' ')        
+        print(' ')
+        
+    if values["roi_A"]:
+        polygonal_roi_image = "Phi2"
+    elif values["roi_B"]:
+        polygonal_roi_image = "I2"
+    elif values["roi_C"]:
+        polygonal_roi_image = "All SHG"
+    else:
+        polygonal_roi_image = None
        
-    return data_path, values["input1"], values["input2"], values["input3"], values["input4"], values["input5"], values["input6"], threshold
+    return data_path, values["input1"], values["input2"], values["input3"], values["input4"], values["input5"], values["input6"], threshold, polygonal_roi_image
