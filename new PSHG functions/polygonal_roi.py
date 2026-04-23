@@ -10,11 +10,13 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pathlib import Path as Path1
 from matplotlib.path import Path as Path2
+from skimage.filters import median
+from skimage.morphology import disk
 import os
 import matplotlib
 matplotlib.use('Qt5Agg') 
 
-def polygonalROI(im, phi2, I2, mask, data_path):
+def polygonalROI(im, phi2, I2, mask, data_path , plot_mode = None):
     
     sPath = data_path + '\\polygon ROI results'
       
@@ -25,9 +27,31 @@ def polygonalROI(im, phi2, I2, mask, data_path):
     polySavePath = sPath + '\\ROI' + str(numberOfExistingFolders + 1)
     os.mkdir(Path1(polySavePath))
     
-    fig, ax = plt.subplots(figsize=(10, 8))
-    ax.imshow(im * mask, cmap='gray', vmin = 0, vmax = np.max(im) * 0.75)
+    fig, ax = plt.subplots(figsize=(14, 12))
+    
+    if plot_mode == 'Phi2':
+        mycm = plt.cm.hsv.copy()
+        mycm.set_bad(color='black') 
+        
+        im = median(mask*im, disk(3))
+        im = np.ma.masked_where(im == 0, im)
+
+        ax.imshow(im, cmap = mycm , vmin=0, vmax=180) 
+    
+    if plot_mode == 'I2':
+        im = median(mask*I2, disk(3))
+        im = np.ma.masked_where(im == 0, im)
+        mycm = plt.cm.get_cmap("hot").copy()
+        mycm.set_bad(color='black') 
+        ax.imshow(im,cmap = mycm, vmin = 0, vmax = np.mean(I2)+np.std(I2))
+    
+    if plot_mode == 'All SHG':
+        im = (im**mask)/np.max(im) 
+        ax.imshow(np.power(im, .7), cmap = 'gray')
+        
+        # ax.imshow(im * mask, cmap='gray', vmin = 0, vmax = np.max(im) * 0.75)
     plt.title('left-click to add points, right-click to close polygon')
+    plt.axis('off')
     
     clicked_points = []
     lines = []
@@ -58,7 +82,9 @@ def polygonalROI(im, phi2, I2, mask, data_path):
         if event.button == 1:
             x, y = event.xdata, event.ydata
             clicked_points.append((x, y))
-            ax.plot(x, y, 'ro', markersize=5)
+            # Draw highly visible marker
+            ax.plot(x, y, 'o', markersize=10, color='black', zorder=3)
+            ax.plot(x, y, 'o', markersize=6, color='yellow', zorder=4)
             
             # Draw line from previous point to this one
             if len(clicked_points) > 1:
