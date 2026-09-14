@@ -12,9 +12,11 @@ from skimage.morphology import disk
 from skimage.filters import median
 import os
 
-def pSHGmultiPanel(allSum, phi2, I2, I4, I4a, I4s, threshLow, threshHigh, data_path):
-    
-    mask = binary_mask( threshLow, threshHigh, allSum)   
+def pSHGmultiPanel(allSum, phi2, I2, I4, I4a, I4s, threshLow, threshHigh, data_path , SNR_mask, maskMode):
+    if maskMode=='trust':
+        mask = SNR_mask
+    else:
+        mask = binary_mask( threshLow, threshHigh, allSum)   
     im = median(mask*phi2, disk(3))
     im = np.ma.masked_where(im == 0.0, im)
     
