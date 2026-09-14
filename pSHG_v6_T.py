@@ -91,6 +91,17 @@ if maskMode == 'trust':
     SNR_mask = snr_trust_mask(res, sigmaPhi2Max, poolSigma,
                           min_feature=150, close_radius=2)['mask']
 
+     # --- bail out cleanly if too few pixels survive the SNR filter ---
+    n_pass    = int(np.count_nonzero(SNR_mask))
+    frac_pass = n_pass / SNR_mask.size
+    if frac_pass < 1e-3:                       # < 0.1 % of pixels (covers the zero case)
+        print(f"\nSNR filter left {n_pass} pixels "
+              f"({frac_pass:.3%} of {SNR_mask.size}) — too sparse for a meaningful mask.")
+        print("Loosen the filter and re-run: raise sigmaPhi2Max, drop minFeature/"
+              "closeRadius, or lower the intensity threshold.")
+        sys.exit()
+    # -----------------------------------------------------------------
+
     gray_red = copy.copy(plt.cm.gray)      # grayscale, but...
     gray_red.set_bad('red')                # ...masked-out pixels drawn bright red
     vmin, vmax = np.percentile(allSum, [1, 99.5])   # shared scaling for both panels
