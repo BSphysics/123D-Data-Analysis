@@ -1,46 +1,71 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jun 10 11:58:03 2022
-
-@author: Ben
-"""
-
+import os
+import re
 from ScanImageTiffReader import ScanImageTiffReader
 
-def imageMetaData(data_path, files_tiff):    
-    
-    filename = data_path + r'/' + files_tiff[0]
-    # vol = ScanImageTiffReader(filename).data();
-    # des = ScanImageTiffReader(filename).description(0);
-    md = ScanImageTiffReader(filename).metadata();
-    
-    frames = md.find('framesPerSlice')
-    slices = md.find('numSlices')
-    zoom = md.find('scanZoomFactor')
-    acqState = md.find('acqState')
-    trig = md.find('trigAcqEdge')
 
-    zStackStep = md.find('stackZStepSize')
+def imageMetaData(data_path, files_tiff, out_name='Image meta data.txt'):
+    """Read the ScanImage header from one representative TIFF and dump every
+    metadata field (including empty ones) to a text file.
 
-    lines = [md[slices : slices+14] , md[zoom:zoom+20] , md[acqState:acqState+18], md[trig:trig+24], md[frames:frames+18], md[zStackStep:zStackStep+21]]
+    files_tiff may be a list/tuple (first entry is used, since the whole
+    acquisition shares one non-varying header) or a single filename string.
+    A full path in place of a bare filename also works.
+    """
+    # --- resolve to a single file: works for a group OR a lone image ------
+    first = files_tiff[0] if isinstance(files_tiff, (list, tuple)) else files_tiff
+    if not first:
+        raise ValueError('No file supplied to imageMetaData')
+    filename = first if os.path.isabs(first) else os.path.join(data_path, first)
 
-    filename = data_path + '/Image meta data.txt'
-    with open(filename, 'w') as f:
-        f.writelines(lines)
-    f.close()
-    
-    zoom = md[zoom:zoom+20]
-    frames = md[frames:frames+18]
-    
-    import re
-    numeric_const_pattern = '[-+]? (?: (?: \d* \. \d+ ) | (?: \d+ \.? ) )(?: [Ee] [+-]? \d+ ) ?'
-    rx = re.compile(numeric_const_pattern, re.VERBOSE)
-    rx.findall(zoom)
-    zoomFactor = float(rx.findall(zoom)[0])
-    print(' Zoom factor = ' + str(zoomFactor))
+    # --- read metadata once -----------------------------------------------
+    with ScanImageTiffReader(filename) as reader:
+        md = reader.metadata()                 # non-varying SI header (+RoiGroups)
+        try:
+            desc0 = reader.description(0)       # per-frame tag of frame 0
+        except Exception:
+            desc0 = ''
 
-    rx.findall(frames)
-    frames = float(rx.findall(frames)[0])
-    print(' Number of frames = ' + str(frames))
-    
-    return zoomFactor, frames,  md[zStackStep:zStackStep+21] , md
+    # --- parse "SI.* = value" lines into a dict (keeps empty RHS) ----------
+    meta = {}
+    for line in md.splitlines():
+        if '=' in line:
+            key, _, val = line.partition('=')
+            meta[key.strip()] = val.strip()
+
+    # --- write EVERYTHING to disk -----------------------------------------
+    out_path = os.path.join(data_path, out_name)
+    with open(out_path, 'w') as f:
+        f.write('# ScanImage metadata for: %s\n\n' % filename)
+        f.write('## Parsed header (all SI.* fields, empties included)\n')
+        for key in sorted(meta):
+            f.write('%s = %s\n' % (key, meta[key]))
+        f.write('\n## Frame 0 per-frame description\n%s\n' % desc0)
+        f.write('\n## Raw metadata string (verbatim)\n%s\n' % md)
+
+    # --- robust lookups: match exact key, else the trailing token ----------
+    num = re.compile(r'[-+]?(?:\d*\.\d+|\d+\.?)(?:[Ee][+-]?\d+)?')
+
+    def find_key(short):
+        if short in meta:
+            return short
+        cands = [k for k in meta if k.split('.')[-1] == short]
+        if len(cands) > 1:
+            print('WARNING: %r is ambiguous: %s' % (short, cands))
+        return cands[0] if cands else None
+
+    def get_number(short):
+        key = find_key(short)
+        if key is None:
+            print('WARNING: %r not found in metadata' % short)
+            return None
+        m = num.search(meta[key])
+        return float(m.group()) if m else None
+
+    zoomFactor = get_number('scanZoomFactor')
+    frames     = get_number('framesPerSlice')
+    zStackStep = get_number('stackZStepSize')
+
+    print(' Zoom factor = %s' % zoomFactor)
+    print(' Number of frames = %s' % frames)
+
+    return zoomFactor, frames, zStackStep, meta
