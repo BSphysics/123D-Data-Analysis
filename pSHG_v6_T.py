@@ -155,7 +155,8 @@ allSumTPF = np.sum(ptpf,0)
 
 color_image = np.zeros((allSum.shape[0], allSum.shape[1], 3), dtype=float)
 color_image[:, :, 1] = allSum/(np.mean(allSum)*2.5)  # Green channel
-color_image[:, :, 0] = allSumTPF/(np.mean(allSumTPF)*4)  # Red channel 
+color_image[:, :, 0] = allSumTPF/(np.mean(allSumTPF)*4)  # Red channel
+color_image = np.clip(color_image, 0, 1)  
 fig, ax1 = plt.subplots()
 plt.imshow(color_image[:,:,:])
 plt.axis('off')
